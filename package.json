@@ -1,0 +1,25 @@
+{
+  "name": "crawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stelios95/crawler.git"
+  },
+  "author": "Asterios Ntinos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stelios95/crawler/issues"
+  },
+  "homepage": "https://github.com/stelios95/crawler#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.9.5",
+    "nodemon": "^2.0.2"
+  }
+}
