@@ -1,5 +1,6 @@
 const express = require('express')
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const dataUtils = require('./utils/dataFetchUtils')
 const app = express()
 const port = 4000;
 
@@ -10,11 +11,11 @@ mongoose
   .connect(dbConnectionString, { useNewUrlParser: true })
   .then(() => {
     //connected
-    console.log("Connected to Atlas DB for page contents!");
+    console.log('Connected to Atlas DB for page contents!');
   })
   .catch(error => {
     //db connection error
-    console.log("ERROR: " + error);
+    console.log('ERROR: ' + error);
   });
 
 
@@ -23,3 +24,11 @@ app.listen(port, () => {
     //listen for the queries of the client
     console.log('Server is up!')
 })
+
+allSeeds = dataUtils.fetchAllSeeds()
+allSeeds.then(result => {
+    console.log(result)
+}).catch(err => {
+    console.log(err)
+})
+
