@@ -9,7 +9,6 @@ async function fetchAllSeeds() {
     try {
       const loginResponse = await axios
         .post(BASE_URL + '/seeds/login', seedCredentials)
-      //console.log(loginResponse.data.token)
        const allSeedsResponse = await axios
         .get(BASE_URL + '/seeds/fetchAll',
             {
@@ -23,4 +22,4 @@ async function fetchAllSeeds() {
     }
   }
 
-  module.exports.fetchAllSeeds = fetchAllSeeds;
+module.exports.fetchAllSeeds = fetchAllSeeds;

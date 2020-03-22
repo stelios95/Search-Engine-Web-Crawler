@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose');
 const dataUtils = require('./utils/dataFetchUtils')
+const siteMapUtils = require('./utils/siteMapUtils')
 const app = express()
 const port = 4000;
 
@@ -24,7 +25,7 @@ app.listen(port, () => {
     //listen for the queries of the client
     console.log('Server is up!')
 })
-
+//------ TEST METHODS ---------//
 allSeeds = dataUtils.fetchAllSeeds()
 allSeeds.then(result => {
     console.log(result)
@@ -32,3 +33,4 @@ allSeeds.then(result => {
     console.log(err)
 })
 
+siteMapUtils.getRobots('https://www.facebook.com/')
