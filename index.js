@@ -26,11 +26,16 @@ app.listen(port, () => {
     console.log('Server is up!')
 })
 //------ TEST METHODS ---------//
-allSeeds = dataUtils.fetchAllSeeds()
-allSeeds.then(result => {
-    console.log(result)
-}).catch(err => {
-    console.log(err)
-})
 
-siteMapUtils.getRobots('https://www.facebook.com/')
+// allSeeds = dataUtils.fetchAllSeeds()
+// allSeeds.then(result => {
+//     console.log(result)
+// }).catch(err => {
+//     console.log(err)
+// })
+
+siteMapUtils.getRobots('https://www.nba.com/')
+ .then(siteMapUtils.getSiteMapUrl)
+ .then(sitemap => {
+   console.log('sitemap ' + sitemap)
+ })
