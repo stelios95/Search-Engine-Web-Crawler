@@ -26,7 +26,7 @@ app.listen(port, () => {
     console.log('Server is up!')
 })
 //------ TEST METHODS ---------//
-
+// FETCH ALL SEEDS
 // allSeeds = dataUtils.fetchAllSeeds()
 // allSeeds.then(result => {
 //     console.log(result)
@@ -34,8 +34,12 @@ app.listen(port, () => {
 //     console.log(err)
 // })
 
+// SITEMAP UTILS TEST
 siteMapUtils.getRobots('https://www.nba.com/')
  .then(siteMapUtils.getSiteMapUrl)
- .then(sitemap => {
-   console.log('sitemap ' + sitemap)
+ .then(siteMapUtils.getSiteMapXml)
+ .catch(err => {
+   console.log(err)
  })
+  
+ 

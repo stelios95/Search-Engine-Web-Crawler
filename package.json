@@ -20,6 +20,8 @@
   "dependencies": {
     "axios": "^0.19.2",
     "express": "^4.17.1",
+    "fast-xml-parser": "^3.16.0",
+    "he": "^1.2.0",
     "mongoose": "^5.9.5",
     "mongoose-unique-validator": "^2.0.3",
     "natural": "^0.6.3",
