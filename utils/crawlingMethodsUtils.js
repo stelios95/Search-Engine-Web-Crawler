@@ -12,11 +12,12 @@ async function crawlWithCheerio(pageJsonInfo){
     let title
     const $ = cheerio.load(pageContent.data)
     title = $('title').text()
-    $('html').each((i, el) => {
+    $('body').each((i, el) => {
         const item = $(el).text()
         content = content + item
     })
     if(content){
+      //console.log(content)
       const site = getSiteDocument(content, pageJsonInfo, title)
       site.save()
       .then((result) => {
@@ -33,7 +34,11 @@ async function crawlWithCheerio(pageJsonInfo){
 
 function getSiteDocument(content, pageJson, title){
   let removedStopwords = textProcessUtils.removeStopWords(content)
-  let finalStemmedContent = textProcessUtils.getStemmedContent(removedStopwords)
+  //console.log(removedStopwords)
+  let withoutLargeWords = textProcessUtils.getRidOfBigWords(removedStopwords)
+ //console.log(withoutLargeWords)
+  let finalStemmedContent = textProcessUtils.getStemmedContent(withoutLargeWords)
+  console.log(finalStemmedContent)
   let lastModification
   if(pageJson['news:news']){
     lastModification = pageJson['news:news']['news:publication_date']

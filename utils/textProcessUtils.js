@@ -5,15 +5,25 @@ const natural = require('natural')
 function removeStopWords(content) {
   let removedSymbols = content
     .replace(/[#_<>/.,();=$:{}-]/g, ' ')
-    .replace(/[!@%^&*+?`~]/g, ' ')
+    .replace(/[!@%^&*+?`~©]/g, ' ')
     .replace(/\[|\]|"|'|\\/g, ' ')
     .replace(/\s{2,}/g, ' ')
   let removedStopWords = stopword.removeStopwords(removedSymbols.split(' ')).toString()
   let contentWithoutStopWords = removedStopWords
     .replace(/,/g, ' ')
-    .replace(/(\b(\w{1,3})\b(\s|$))/g, '')
-    .replace(/undefined|null/g, '')
+    .replace(/(\b(\w{1,2})\b(\s|$))/g, '')
+    .replace(/undefined|null|[0-9]/g, '')
   return contentWithoutStopWords    
+}
+
+//get rid of large words or numbers
+function getRidOfBigWords(content){
+  contentArray = content.split(' ')
+  filteredArray = contentArray.filter(element => {
+    return element.length < 15
+  })
+  //console.log(filteredArray)
+  return filteredArray.join(' ')
 }
 
 //tokenize content and apply porter Stemmer
@@ -23,4 +33,5 @@ function getStemmedContent(content) {
 }
 
 module.exports.removeStopWords = removeStopWords
+module.exports.getRidOfBigWords = getRidOfBigWords
 module.exports.getStemmedContent = getStemmedContent
