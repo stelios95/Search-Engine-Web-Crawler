@@ -47,6 +47,7 @@ async function getSiteMapXml(url){
       return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
     }
     //if it is not
+    console.log(JSON.stringify(jsonObj.urlset.url[0]['news:news']['news:publication_date']))
     return jsonObj
   }
 }

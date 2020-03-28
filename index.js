@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose');
 const dataUtils = require('./utils/dataFetchUtils')
 const siteMapUtils = require('./utils/siteMapUtils')
+const crawlingUtils = require('./utils/crawlingMethodsUtils')
 const app = express()
 const port = 4000;
 
@@ -35,24 +36,27 @@ app.listen(port, () => {
 // })
 
 // SITEMAP UTILS TEST
-// siteMapUtils.getRobots('https://edition.cnn.com')
-//  .then(siteMapUtils.getSiteMapUrl)
-//  .then(siteMapUtils.getSiteMapXml)
-//  .catch(err => {
-//    console.log(err)
-//  })
+siteMapUtils.getRobots('https://edition.cnn.com')
+ .then(siteMapUtils.getSiteMapUrl)
+ .then(siteMapUtils.getSiteMapXml)
+ .then(res => {
+  crawlingUtils.crawlWithCheerio(res.urlset.url[0])
+ })
+ .catch(err => {
+   console.log(err)
+ })
 
 // changing freq
-setTimeout(() => {
-res = dataUtils.getFrequentlyChangedSites()
-res.then(res => {
-  console.log(res)
-})}, 10000)
+// setTimeout(() => {
+// res = dataUtils.getFrequentlyChangedSites()
+// res.then(res => {
+//   console.log(res)
+// })}, 10000)
  
-// should be crawled
-setTimeout(() => {
-  res = dataUtils.shouldBeCrawled('someurl')
-  res.then(res => {
-    console.log(res)
-  })}, 10000)
+// // should be crawled
+// setTimeout(() => {
+//   res = dataUtils.shouldBeCrawled('someurl')
+//   res.then(res => {
+//     console.log(res)
+//   })}, 10000)
    

@@ -6,7 +6,7 @@ function removeStopWords(content) {
   let removedSymbols = content
     .replace(/[#_<>/.,();=$:{}-]/g, ' ')
     .replace(/[!@%^&*+?`~]/g, ' ')
-    .replace(/\[|\]|"|'|\\/g, ' '
+    .replace(/\[|\]|"|'|\\/g, ' ')
     .replace(/\s{2,}/g, ' ')
   let removedStopWords = stopword.removeStopwords(removedSymbols.split(' ')).toString()
   let contentWithoutStopWords = removedStopWords
