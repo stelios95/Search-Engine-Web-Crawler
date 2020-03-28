@@ -26,7 +26,11 @@ const pageSchema = new Schema({
     },
     priority: {
         type: String
+    },
+    isNews: {
+        type:Boolean
     }
 })
+
 siteSchema.plugin(uniqueValidator)
 module.exports = mongoose.model('Page', pageSchema)
