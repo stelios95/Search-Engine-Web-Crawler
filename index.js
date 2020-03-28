@@ -35,7 +35,7 @@ app.listen(port, () => {
 // })
 
 // SITEMAP UTILS TEST
-siteMapUtils.getRobots('https://www.nba.com/')
+siteMapUtils.getRobots('https://edition.cnn.com')
  .then(siteMapUtils.getSiteMapUrl)
  .then(siteMapUtils.getSiteMapXml)
  .catch(err => {
