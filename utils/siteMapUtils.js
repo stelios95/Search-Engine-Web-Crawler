@@ -3,14 +3,14 @@ const parser = require('fast-xml-parser')
 const he = require('he')
 
 async function getRobots(url){
-    //make request to get the robots.txt
-    try {
-        const robotsResponse = await axios
-          .get(url + '/robots.txt')
-        return robotsResponse.data
-      } catch (error) {
-        console.error(error);
-      }
+  //make request to get the robots.txt
+  try {
+      const robotsResponse = await axios
+        .get(url + '/robots.txt')
+      return robotsResponse.data
+    } catch (error) {
+      console.error(error);
+    }
 }
 
 async function getSiteMapUrl(robots){

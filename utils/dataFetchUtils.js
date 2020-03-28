@@ -6,20 +6,20 @@ const seedCredentials = {
 }
 
 async function fetchAllSeeds() {
-    try {
-      const loginResponse = await axios
-        .post(BASE_URL + '/seeds/login', seedCredentials)
-       const allSeedsResponse = await axios
-        .get(BASE_URL + '/seeds/fetchAll',
-            {
-                headers: {
-                Authorization: `Bearer ${loginResponse.data.token}`
-            }
-        })
-        return allSeedsResponse.data
-    } catch (error) {
-      console.error(error);
-    }
+  try {
+    const loginResponse = await axios
+      .post(BASE_URL + '/seeds/login', seedCredentials)
+      const allSeedsResponse = await axios
+      .get(BASE_URL + '/seeds/fetchAll',
+          {
+            headers: {
+            Authorization: `Bearer ${loginResponse.data.token}`
+          }
+      })
+      return allSeedsResponse.data
+  } catch (error) {
+    console.error(error)
   }
+}
 
-module.exports.fetchAllSeeds = fetchAllSeeds;
+module.exports.fetchAllSeeds = fetchAllSeeds
