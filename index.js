@@ -35,11 +35,24 @@ app.listen(port, () => {
 // })
 
 // SITEMAP UTILS TEST
-siteMapUtils.getRobots('https://edition.cnn.com')
- .then(siteMapUtils.getSiteMapUrl)
- .then(siteMapUtils.getSiteMapXml)
- .catch(err => {
-   console.log(err)
- })
-  
+// siteMapUtils.getRobots('https://edition.cnn.com')
+//  .then(siteMapUtils.getSiteMapUrl)
+//  .then(siteMapUtils.getSiteMapXml)
+//  .catch(err => {
+//    console.log(err)
+//  })
+
+// changing freq
+setTimeout(() => {
+res = dataUtils.getFrequentlyChangedSites()
+res.then(res => {
+  console.log(res)
+})}, 10000)
  
+// should be crawled
+setTimeout(() => {
+  res = dataUtils.shouldBeCrawled('someurl')
+  res.then(res => {
+    console.log(res)
+  })}, 10000)
+   

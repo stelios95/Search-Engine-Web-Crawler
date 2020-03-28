@@ -32,5 +32,5 @@ const pageSchema = new Schema({
     }
 })
 
-siteSchema.plugin(uniqueValidator)
-module.exports = mongoose.model('Page', pageSchema)
+pageSchema.plugin(uniqueValidator)
+module.exports = mongoose.model('Site', pageSchema)
