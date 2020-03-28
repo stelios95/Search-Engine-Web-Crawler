@@ -36,11 +36,22 @@ app.listen(port, () => {
 // })
 
 // SITEMAP UTILS TEST
+// siteMapUtils.getRobots('https://edition.cnn.com')
+//  .then(siteMapUtils.getSiteMapUrl)
+//  .then(siteMapUtils.getSiteMapXml)
+//  .then(res => {
+//   crawlingUtils.crawlWithCheerio(res.urlset.url[0])
+//  })
+//  .catch(err => {
+//    console.log(err)
+//  })
+
+//puppeteer
 siteMapUtils.getRobots('https://edition.cnn.com')
  .then(siteMapUtils.getSiteMapUrl)
  .then(siteMapUtils.getSiteMapXml)
  .then(res => {
-  crawlingUtils.crawlWithCheerio(res.urlset.url[0])
+  crawlingUtils.crawlWithPuppeteer(res.urlset.url[0])
  })
  .catch(err => {
    console.log(err)

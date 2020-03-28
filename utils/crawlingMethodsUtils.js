@@ -1,5 +1,6 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
+const puppeteer = require('puppeteer');
 const textProcessUtils = require('./textProcessUtils')
 const Site = require('../pageSchema')
 
@@ -32,6 +33,43 @@ async function crawlWithCheerio(pageJsonInfo){
   }
 }
 
+async function crawlWithPuppeteer(pageJsonInfo){
+  (async () => {
+    console.log('puppeteer')
+    try {
+      const browser = await puppeteer.launch({ 
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-GB'],
+          });
+      //console.log(browser)
+      const page = await browser.newPage()
+      await page.goto(pageJsonInfo.loc, {waitUntil: 'load', timeout: 0})
+      //await page.waitForSelector('.category', { timeout: 1000 });
+      const title = await page.evaluate(() => {
+        return document.querySelector('title').innerText
+      })
+      //console.log(title)
+      //get all content
+      const body = await page.evaluate(() => {
+        return document.querySelector('html').innerText})
+      if(body) {
+        const site = getSiteDocument(body, pageJsonInfo, title)
+        site.save()
+        .then((result) => {
+            console.log('Document Saved ' + site.title)
+        })
+        .catch((err) => {
+            console.log('An error occured: ' + err)
+        })
+      }
+      await page.close()
+      await browser.close()
+    } catch(err){
+      console.log(err)
+    }
+  })()
+}
+
 function getSiteDocument(content, pageJson, title){
   let removedStopwords = textProcessUtils.removeStopWords(content)
   //console.log(removedStopwords)
@@ -61,3 +99,4 @@ function getSiteDocument(content, pageJson, title){
 }
 
 module.exports.crawlWithCheerio = crawlWithCheerio
+module.exports.crawlWithPuppeteer = crawlWithPuppeteer

@@ -27,6 +27,7 @@
     "mongoose-unique-validator": "^2.0.3",
     "natural": "^0.6.3",
     "nodemon": "^2.0.2",
+    "puppeteer": "^2.1.1",
     "stopword": "^1.0.0"
   }
 }
