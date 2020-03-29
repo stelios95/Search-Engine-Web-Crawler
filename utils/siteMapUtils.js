@@ -5,11 +5,12 @@ const he = require('he')
 async function getRobots(url){
   //make request to get the robots.txt
   try {
+    console.log(url + '/robots.txt' )
       const robotsResponse = await axios
-        .get(url + '/robots.txt')
+        .get(url + 'robots.txt')
       return robotsResponse.data
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
 }
 
@@ -47,7 +48,7 @@ async function getSiteMapXml(url){
       return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
     }
     //if it is not
-    console.log(JSON.stringify(jsonObj.urlset.url[0]['news:news']['news:publication_date']))
+    //console.log(JSON.stringify(jsonObj.urlset.url[0]['news:news']['news:publication_date']))
     return jsonObj
   }
 }

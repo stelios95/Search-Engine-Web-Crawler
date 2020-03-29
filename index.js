@@ -1,8 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose');
-const dataUtils = require('./utils/dataFetchUtils')
-const siteMapUtils = require('./utils/siteMapUtils')
-const crawlingUtils = require('./utils/crawlingMethodsUtils')
+const crawlingProcesses = require('./crawlingProcesses')
 const app = express()
 const port = 4000;
 
@@ -26,6 +24,10 @@ app.listen(port, () => {
     //listen for the queries of the client
     console.log('Server is up!')
 })
+
+crawlingProcesses.runFullCrawlingProcess().then(()=>{
+  console.log('Process Finished!!')
+})
 //------ TEST METHODS ---------//
 // FETCH ALL SEEDS
 // allSeeds = dataUtils.fetchAllSeeds()
@@ -47,15 +49,15 @@ app.listen(port, () => {
 //  })
 
 //puppeteer
-siteMapUtils.getRobots('https://edition.cnn.com')
- .then(siteMapUtils.getSiteMapUrl)
- .then(siteMapUtils.getSiteMapXml)
- .then(res => {
-  crawlingUtils.crawlWithPuppeteer(res.urlset.url[0])
- })
- .catch(err => {
-   console.log(err)
- })
+// siteMapUtils.getRobots('https://edition.cnn.com')
+//  .then(siteMapUtils.getSiteMapUrl)
+//  .then(siteMapUtils.getSiteMapXml)
+//  .then(res => {
+//   crawlingUtils.crawlWithPuppeteer(res.urlset.url[0])
+//  })
+//  .catch(err => {
+//    console.log(err)
+//  })
 
 // changing freq
 // setTimeout(() => {

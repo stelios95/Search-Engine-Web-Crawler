@@ -31,9 +31,8 @@ async function getFrequentlyChangedSites(){
 // if the site is crawled and not frequently changing
 // it shouldn't be crawled again
 async function shouldBeCrawled(url){
-  let shouldBeCrawled = false
-  let result = await Site.find({ $and: [{"changefreq": '', "loc": url}]})
-  return (result.length > 0) ? false : true 
+  let result = await Site.find({"loc": url})
+  return (result.length > 0) ? false : true
 }
 
 module.exports.fetchAllSeeds = fetchAllSeeds

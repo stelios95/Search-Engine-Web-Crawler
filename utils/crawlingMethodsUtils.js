@@ -7,7 +7,7 @@ const Site = require('../pageSchema')
 async function crawlWithCheerio(pageJsonInfo){
   console.log('cheerio')
   try{
-    let pageContent = await axios.get(pageJsonInfo.loc)
+    let pageContent = await axios.get(pageJsonInfo.loc.toString())
     //console.log(pageContent.data)
     let content
     let title
@@ -76,7 +76,7 @@ function getSiteDocument(content, pageJson, title){
   let withoutLargeWords = textProcessUtils.getRidOfBigWords(removedStopwords)
  //console.log(withoutLargeWords)
   let finalStemmedContent = textProcessUtils.getStemmedContent(withoutLargeWords)
-  console.log(finalStemmedContent)
+  //console.log(finalStemmedContent)
   let lastModification
   if(pageJson['news:news']){
     lastModification = pageJson['news:news']['news:publication_date']
