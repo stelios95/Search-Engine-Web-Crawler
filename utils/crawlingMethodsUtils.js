@@ -4,10 +4,10 @@ const puppeteer = require('puppeteer');
 const textProcessUtils = require('./textProcessUtils')
 const Site = require('../pageSchema')
 
-async function crawlWithCheerio(pageJsonInfo){
+async function crawlWithCheerio(pageJsonInfo, method){
   console.log('cheerio')
   try{
-    let pageContent = await axios.get(pageJsonInfo.loc.toString())
+    let pageContent = await axios.get(pageJsonInfo.loc)
     //console.log(pageContent.data)
     let content
     let title
@@ -19,7 +19,7 @@ async function crawlWithCheerio(pageJsonInfo){
     })
     if(content){
       //console.log(content)
-      const site = getSiteDocument(content, pageJsonInfo, title)
+      const site = getSiteDocument(content, pageJsonInfo, title, method)
       site.save()
       .then((result) => {
           console.log('Document Saved ' + site.title)
@@ -33,7 +33,7 @@ async function crawlWithCheerio(pageJsonInfo){
   }
 }
 
-async function crawlWithPuppeteer(pageJsonInfo){
+async function crawlWithPuppeteer(pageJsonInfo, method){
   (async () => {
     console.log('puppeteer')
     try {
@@ -53,7 +53,7 @@ async function crawlWithPuppeteer(pageJsonInfo){
       const body = await page.evaluate(() => {
         return document.querySelector('html').innerText})
       if(body) {
-        const site = getSiteDocument(body, pageJsonInfo, title)
+        const site = getSiteDocument(body, pageJsonInfo, title, method)
         site.save()
         .then((result) => {
             console.log('Document Saved ' + site.title)
@@ -70,7 +70,7 @@ async function crawlWithPuppeteer(pageJsonInfo){
   })()
 }
 
-function getSiteDocument(content, pageJson, title){
+function getSiteDocument(content, pageJson, title, method){
   let removedStopwords = textProcessUtils.removeStopWords(content)
   //console.log(removedStopwords)
   let withoutLargeWords = textProcessUtils.getRidOfBigWords(removedStopwords)
@@ -93,6 +93,7 @@ function getSiteDocument(content, pageJson, title){
     changefreq: pageJson.changefreq ? pageJson.changefreq : null,
     priority: pageJson.priority ? pageJson.priority : null,
     isNews: pageJson['news:news'] ? true : false,
+    method: method
   })
   //console.log(page)
   return page

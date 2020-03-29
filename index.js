@@ -24,52 +24,8 @@ app.listen(port, () => {
     //listen for the queries of the client
     console.log('Server is up!')
 })
+//================ FULL CRAWL ==============
+// crawlingProcesses.runFullCrawlingProcess()
 
-crawlingProcesses.runFullCrawlingProcess().then(()=>{
-  console.log('Process Finished!!')
-})
-//------ TEST METHODS ---------//
-// FETCH ALL SEEDS
-// allSeeds = dataUtils.fetchAllSeeds()
-// allSeeds.then(result => {
-//     console.log(result)
-// }).catch(err => {
-//     console.log(err)
-// })
-
-// SITEMAP UTILS TEST
-// siteMapUtils.getRobots('https://edition.cnn.com')
-//  .then(siteMapUtils.getSiteMapUrl)
-//  .then(siteMapUtils.getSiteMapXml)
-//  .then(res => {
-//   crawlingUtils.crawlWithCheerio(res.urlset.url[0])
-//  })
-//  .catch(err => {
-//    console.log(err)
-//  })
-
-//puppeteer
-// siteMapUtils.getRobots('https://edition.cnn.com')
-//  .then(siteMapUtils.getSiteMapUrl)
-//  .then(siteMapUtils.getSiteMapXml)
-//  .then(res => {
-//   crawlingUtils.crawlWithPuppeteer(res.urlset.url[0])
-//  })
-//  .catch(err => {
-//    console.log(err)
-//  })
-
-// changing freq
-// setTimeout(() => {
-// res = dataUtils.getFrequentlyChangedSites()
-// res.then(res => {
-//   console.log(res)
-// })}, 10000)
- 
-// // should be crawled
-// setTimeout(() => {
-//   res = dataUtils.shouldBeCrawled('someurl')
-//   res.then(res => {
-//     console.log(res)
-//   })}, 10000)
-   
+//=============== REFRESH CRAWL ============
+// crawlingProcesses.refreshDatabaseContent()

@@ -18,6 +18,10 @@ const pageSchema = new Schema({
         type: String,
         required: true
     },
+    method: {
+        type: Number,
+        required: true
+    },
     lastmod: {
         type: Date
     },
