@@ -18,7 +18,6 @@ mongoose
     console.log('ERROR: ' + error);
   });
 
-
 //server listening
 app.listen(port, () => {
     //listen for the queries of the client
@@ -28,4 +27,4 @@ app.listen(port, () => {
 // crawlingProcesses.runFullCrawlingProcess()
 
 //=============== REFRESH CRAWL ============
-// crawlingProcesses.refreshDatabaseContent()
+//crawlingProcesses.refreshDatabaseContent()

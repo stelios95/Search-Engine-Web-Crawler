@@ -71,12 +71,7 @@ async function crawlWithPuppeteer(pageJsonInfo, method){
 }
 
 function getSiteDocument(content, pageJson, title, method){
-  let removedStopwords = textProcessUtils.removeStopWords(content)
-  //console.log(removedStopwords)
-  let withoutLargeWords = textProcessUtils.getRidOfBigWords(removedStopwords)
- //console.log(withoutLargeWords)
-  let finalStemmedContent = textProcessUtils.getStemmedContent(withoutLargeWords)
-  //console.log(finalStemmedContent)
+  let finalStemmedContent = textProcessUtils.getProcessedContent(content)
   let lastModification
   if(pageJson['news:news']){
     lastModification = pageJson['news:news']['news:publication_date']
@@ -95,7 +90,6 @@ function getSiteDocument(content, pageJson, title, method){
     isNews: pageJson['news:news'] ? true : false,
     method: method
   })
-  //console.log(page)
   return page
 }
 

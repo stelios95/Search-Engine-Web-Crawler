@@ -32,6 +32,12 @@ function getStemmedContent(content) {
   return content.tokenizeAndStem().toString().replace(/,/g, ' ')
 }
 
-module.exports.removeStopWords = removeStopWords
-module.exports.getRidOfBigWords = getRidOfBigWords
-module.exports.getStemmedContent = getStemmedContent
+function getProcessedContent(content){
+  let removedStopwords = removeStopWords(content)
+  let withoutLargeWords = getRidOfBigWords(removedStopwords)
+  let finalStemmedContent = getStemmedContent(withoutLargeWords)
+  return finalStemmedContent
+}
+
+module.exports.getProcessedContent = getProcessedContent
+
