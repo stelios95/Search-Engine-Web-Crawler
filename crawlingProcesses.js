@@ -13,17 +13,21 @@ async function refreshDatabaseContent(){
       console.log(site)
       if(site.method){        
         (async () => {
+          console.log('puppeteer')
             const browser = await puppeteer.launch({ 
                   headless: true,
                   args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-GB'],
                 });
             const page = await browser.newPage()
             await page.goto(site.loc, {waitUntil: 'load', timeout: 0})
-            //get all content
+            const title = await page.evaluate(() => {
+              return document.querySelector('title').innerText
+            })
             const body = await page.evaluate(() => {
               return document.querySelector('html').innerText})
             if(body) {
-              site.content = textProcessUtils.getProcessedContent(body)
+              let processedContent = textProcessUtils.getProcessedContent(body)
+              site.content = processedContent
               await page.close()
               await browser.close()
             }
@@ -31,20 +35,19 @@ async function refreshDatabaseContent(){
       } else {
         let pageContent = await axios.get(site.loc)
         let content
+        let title
         const $ = cheerio.load(pageContent.data)
+        title = $('title').text()
         $('body').each((i, el) => {
             const item = $(el).text()
             content = content + item
         })
         if(content){
-          site.content = textProcessUtils.getProcessedContent(content)
+          let processedContent = textProcessUtils.getProcessedContent(content)
+          site.content = processedContent
         }
       }
-      site.save().then((site => {
-        console.log('Document: ' + site.title + ' saved!')
-      })).catch(err => {
-        console.log(err)
-      })
+      await site.save();
     }
   } catch (err){
     console.log(err)
@@ -56,21 +59,26 @@ async function runFullCrawlingProcess(){
     let seeds = await dataUtils.fetchAllSeeds()
     for(const seed of seeds){
       let robots = await siteMapUtils.getRobots(seed.page)
-      //console.log(robots)
       let siteMapUrl = await siteMapUtils.getSiteMapUrl(robots)
       console.log(siteMapUrl)
       let siteMap = await siteMapUtils.getSiteMapXml(siteMapUrl)
-      for(let i = 0; i < seed.numberOfChildren; i++){
-        let shouldBeCrawled = await dataUtils.shouldBeCrawled(siteMap.urlset.url[i].loc)
+      let pagesCrawled = 0
+      let index = 0
+      while(pagesCrawled < seed.numberOfChildren){
+        if(!textProcessUtils.isAscii(siteMap.urlset.url[index]['news:news']['news:title'])){
+          index++
+          continue
+        }
+        let shouldBeCrawled = await dataUtils.shouldBeCrawled(siteMap.urlset.url[index].loc)
         if(shouldBeCrawled){
           if(seed.method){
-            //pup
-            crawlingUtils.crawlWithPuppeteer(siteMap.urlset.url[i], seed.method)
+            crawlingUtils.crawlWithPuppeteer(siteMap.urlset.url[index], seed.method)
           } else {
-            //cheerio
-            crawlingUtils.crawlWithCheerio(siteMap.urlset.url[i], seed.method)
+            crawlingUtils.crawlWithCheerio(siteMap.urlset.url[index], seed.method)
           }
+          pagesCrawled++
         }
+        index++
       }
     }
   } catch (err) {

@@ -39,5 +39,12 @@ function getProcessedContent(content){
   return finalStemmedContent
 }
 
+//check if string has only ascii code charachters
+function isAscii(str) {
+  for(let i = 0; i < str.length; i++){
+    if (str.charCodeAt(i) > 127) return false
+  }
+  return true
+}
+module.exports.isAscii = isAscii
 module.exports.getProcessedContent = getProcessedContent
-
