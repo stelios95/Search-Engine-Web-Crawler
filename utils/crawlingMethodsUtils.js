@@ -5,7 +5,7 @@ const textProcessUtils = require('./textProcessUtils')
 const Site = require('../pageSchema')
 
 async function crawlWithCheerio(pageJsonInfo, method, pageTitle){
-  console.log('cheerio')
+  //console.log('cheerio')
   try{
     let pageContent = await axios.get(pageJsonInfo.loc)
     let content
@@ -32,7 +32,7 @@ async function crawlWithCheerio(pageJsonInfo, method, pageTitle){
 
 async function crawlWithPuppeteer(pageJsonInfo, method, pageTitle){
   (async () => {
-    console.log('puppeteer')
+    //console.log('puppeteer')
     try {
       const browser = await puppeteer.launch({ 
             headless: true,
@@ -91,7 +91,6 @@ async function getPageTitle(url){
     let pageContent = await axios.get(url)
     const $ = cheerio.load(pageContent.data)
     title = $('title').text()
-    console.log(title)
     return title
   } catch (err){
     console.log(err)

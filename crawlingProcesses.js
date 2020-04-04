@@ -48,7 +48,7 @@ async function refreshDatabaseContent(){
     console.log(err)
   } finally {
     setTimeout(() => {
-      console.log('FULL CRAWL FINISHED!')
+      console.log('REFRESH FINISHED!')
     }, 3000)
   }
 }
