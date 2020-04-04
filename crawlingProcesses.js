@@ -46,11 +46,7 @@ async function refreshDatabaseContent(){
     }
   } catch (err){
     console.log(err)
-  } finally {
-    setTimeout(() => {
-      console.log('REFRESH FINISHED!')
-    }, 3000)
-  }
+  } 
 }
 
 async function runFullCrawlingProcess(){
@@ -91,11 +87,7 @@ async function runFullCrawlingProcess(){
     }
   } catch (err) {
     console.log(err)
-  } finally {
-    setTimeout(() => {
-      console.log('FULL CRAWL FINISHED!')
-    }, 3000)
-  }
+  } 
 }
 
 module.exports.refreshDatabaseContent = refreshDatabaseContent
