@@ -4,21 +4,18 @@ const puppeteer = require('puppeteer');
 const textProcessUtils = require('./textProcessUtils')
 const Site = require('../pageSchema')
 
-async function crawlWithCheerio(pageJsonInfo, method){
+async function crawlWithCheerio(pageJsonInfo, method, pageTitle){
   console.log('cheerio')
   try{
     let pageContent = await axios.get(pageJsonInfo.loc)
-    //console.log(pageContent.data)
     let content
-    let title
+    let title = pageTitle
     const $ = cheerio.load(pageContent.data)
-    title = $('title').text()
     $('body').each((i, el) => {
         const item = $(el).text()
         content = content + item
     })
     if(content){
-      //console.log(content)
       const site = getSiteDocument(content, pageJsonInfo, title, method)
       site.save()
       .then((result) => {
@@ -33,7 +30,7 @@ async function crawlWithCheerio(pageJsonInfo, method){
   }
 }
 
-async function crawlWithPuppeteer(pageJsonInfo, method){
+async function crawlWithPuppeteer(pageJsonInfo, method, pageTitle){
   (async () => {
     console.log('puppeteer')
     try {
@@ -41,17 +38,13 @@ async function crawlWithPuppeteer(pageJsonInfo, method){
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-GB'],
           });
-      //console.log(browser)
       const page = await browser.newPage()
       await page.goto(pageJsonInfo.loc, {waitUntil: 'load', timeout: 0})
-      //await page.waitForSelector('.category', { timeout: 1000 });
-      const title = await page.evaluate(() => {
-        return document.querySelector('title').innerText
-      })
-      //console.log(title)
-      //get all content
+      const title = pageTitle
       const body = await page.evaluate(() => {
         return document.querySelector('html').innerText})
+      await page.close()
+      await browser.close()  
       if(body) {
         const site = getSiteDocument(body, pageJsonInfo, title, method)
         site.save()
@@ -62,16 +55,15 @@ async function crawlWithPuppeteer(pageJsonInfo, method){
             console.log('An error occured: ' + err)
         })
       }
-      await page.close()
-      await browser.close()
     } catch(err){
       console.log(err)
-    }
+    } 
   })()
 }
 
 function getSiteDocument(content, pageJson, title, method){
   let finalStemmedContent = textProcessUtils.getProcessedContent(content)
+  let processedTitle = textProcessUtils.getProcessedContent(title)
   let lastModification
   if(pageJson['news:news']){
     lastModification = pageJson['news:news']['news:publication_date']
@@ -82,6 +74,7 @@ function getSiteDocument(content, pageJson, title, method){
   }
   const page = new Site({
     title: title,
+    processedTitle: processedTitle,
     loc: pageJson.loc,
     content: finalStemmedContent,
     lastmod: lastModification,
@@ -93,5 +86,18 @@ function getSiteDocument(content, pageJson, title, method){
   return page
 }
 
+async function getPageTitle(url){
+  try {
+    let pageContent = await axios.get(url)
+    const $ = cheerio.load(pageContent.data)
+    title = $('title').text()
+    console.log(title)
+    return title
+  } catch (err){
+    console.log(err)
+  }
+} 
+
 module.exports.crawlWithCheerio = crawlWithCheerio
 module.exports.crawlWithPuppeteer = crawlWithPuppeteer
+module.exports.getPageTitle = getPageTitle

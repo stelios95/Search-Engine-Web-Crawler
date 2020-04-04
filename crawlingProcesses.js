@@ -20,24 +20,19 @@ async function refreshDatabaseContent(){
                 });
             const page = await browser.newPage()
             await page.goto(site.loc, {waitUntil: 'load', timeout: 0})
-            const title = await page.evaluate(() => {
-              return document.querySelector('title').innerText
-            })
             const body = await page.evaluate(() => {
               return document.querySelector('html').innerText})
+            await page.close()
+            await browser.close()  
             if(body) {
               let processedContent = textProcessUtils.getProcessedContent(body)
               site.content = processedContent
-              await page.close()
-              await browser.close()
             }
           })
       } else {
         let pageContent = await axios.get(site.loc)
         let content
-        let title
         const $ = cheerio.load(pageContent.data)
-        title = $('title').text()
         $('body').each((i, el) => {
             const item = $(el).text()
             content = content + item
@@ -51,10 +46,15 @@ async function refreshDatabaseContent(){
     }
   } catch (err){
     console.log(err)
+  } finally {
+    setTimeout(() => {
+      console.log('FULL CRAWL FINISHED!')
+    }, 3000)
   }
 }
 
 async function runFullCrawlingProcess(){
+  const titleLimit = 150
   try{
     let seeds = await dataUtils.fetchAllSeeds()
     for(const seed of seeds){
@@ -64,17 +64,25 @@ async function runFullCrawlingProcess(){
       let siteMap = await siteMapUtils.getSiteMapXml(siteMapUrl)
       let pagesCrawled = 0
       let index = 0
-      while(pagesCrawled < seed.numberOfChildren){
-        if(!textProcessUtils.isAscii(siteMap.urlset.url[index]['news:news']['news:title'])){
+      while(pagesCrawled < seed.numberOfChildren
+        && siteMap.urlset.url[index]){
+        if(siteMap.urlset.url[index]['news:news'] 
+          && (!textProcessUtils.isAscii(siteMap.urlset.url[index]['news:news']['news:title']) 
+          || siteMap.urlset.url[index]['news:news']['news:title'].length > titleLimit)){
           index++
           continue
         }
         let shouldBeCrawled = await dataUtils.shouldBeCrawled(siteMap.urlset.url[index].loc)
         if(shouldBeCrawled){
+          let title  = await crawlingUtils.getPageTitle(siteMap.urlset.url[index].loc)
+          if(!textProcessUtils.isAscii(title) || title.length > titleLimit){
+            index++
+            continue
+          }
           if(seed.method){
-            crawlingUtils.crawlWithPuppeteer(siteMap.urlset.url[index], seed.method)
+            crawlingUtils.crawlWithPuppeteer(siteMap.urlset.url[index], seed.method, title)
           } else {
-            crawlingUtils.crawlWithCheerio(siteMap.urlset.url[index], seed.method)
+            crawlingUtils.crawlWithCheerio(siteMap.urlset.url[index], seed.method, title)
           }
           pagesCrawled++
         }
@@ -83,6 +91,10 @@ async function runFullCrawlingProcess(){
     }
   } catch (err) {
     console.log(err)
+  } finally {
+    setTimeout(() => {
+      console.log('FULL CRAWL FINISHED!')
+    }, 3000)
   }
 }
 
