@@ -2,7 +2,7 @@ const express = require('express')
 const crons = require('./index')
 const configRoute = express.Router()
 const cors = require("cors")
-const app = express()res.status(200).send(result)
+const app = express()
 
 app.use(cors())
 configRoute.route('/changeInterval').post((req, res) => {
