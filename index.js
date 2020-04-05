@@ -1,7 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser')
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 4500
 const cors = require('cors')
 const CronJob = require('cron').CronJob;
 const crawlingProcesses = require('./crawlingProcesses')
@@ -33,7 +33,7 @@ app.listen(PORT, () => {
 
 const jobs = {}
 //================ FULL CRAWL ================================
-jobs.fullCrawlJob = new CronJob('0 */4 * * * *', function() {
+jobs.fullCrawlJob = new CronJob('0 0 */12 * * *', function() {
   let date = new Date()
   console.log(`FULL CRAWL STARTED ON: ${date.getMinutes()}`)
   crawlingProcesses.runFullCrawlingProcess()
@@ -41,7 +41,7 @@ jobs.fullCrawlJob = new CronJob('0 */4 * * * *', function() {
 
 
 //=============== REFRESH DATABASE ============================
-jobs.refreshJob = new CronJob('0 */2 * * * *', function() {
+jobs.refreshJob = new CronJob('0 0 */6 * * *', function() {
   let date = new Date()
   console.log(`REFRESH STARTED ON: ${date.getMinutes()}`)
   crawlingProcesses.refreshDatabaseContent()
@@ -53,14 +53,14 @@ function changeCronInterval(job, newPeriod, task) { // task = 1 -> full crawl
     job.stop()
   }
   if(task){
-    job = new CronJob('*/' + newPeriod + ' * * * * *', function () {
+    job = new CronJob('0 0 */' + newPeriod + ' * * *', function () {
       let date = new Date()
       console.log(`FULL CRAWL STARTED ON: ${date.getMinutes()}`)
       crawlingProcesses.runFullCrawlingProcess()
     }, null, true, 'America/Los_Angeles')
     job.start()
   } else {
-    job = new CronJob('*/' + newPeriod + ' * * * * *', function () {
+    job = new CronJob('0 0 */' + newPeriod + ' * * *', function () {
       let date = new Date()
       console.log(`REFRESH STARTED ON: ${date.getMinutes()}`)
       crawlingProcesses.refreshDatabaseContent()
