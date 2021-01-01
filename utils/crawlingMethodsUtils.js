@@ -82,7 +82,8 @@ async function getPageTitle(url) {
     if (pageContent.status !== 200) pageContent = "";
     if (pageContent) {
       const $ = cheerio.load(pageContent.data);
-      title = $("title").text();
+      title = $("title").text().split(' - ')[0];
+      title = title.split(' | ')[0]
     }
   } catch (err) {
     console.log(err.message);

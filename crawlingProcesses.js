@@ -65,9 +65,9 @@ async function runFullCrawlingProcess() {
     for (const seed of seeds) {
       let robots = await siteMapUtils.getRobots(seed.page);
       let siteMapUrl = await siteMapUtils.getSiteMapUrl(robots);
-      // console.log(siteMapUrl);
       let siteMap = await siteMapUtils.getSiteMapXml(siteMapUrl);
-      //console.log(siteMap);
+      siteMap.urlset.url.unshift({loc: seed.page})
+      // console.log(siteMap.urlset.url[0])
       let pagesCrawled = 0;
       let index = 0;
       while (
