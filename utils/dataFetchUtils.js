@@ -29,13 +29,10 @@ async function getFrequentlyChangedSites() {
   return await Site.find({ changefreq: { $ne: null } });
 }
 
-// if the site is crawled and not frequently changing
-// it shouldn't be crawled again
-async function shouldBeCrawled(url) {
-  let result = await Site.find({ loc: url });
-  return result.length > 0 ? false : true;
+async function getAlreadyCrawled(url) {
+  return await Site.find({ loc: {$regex: ".*" + url + ".*"} });
 }
 
 module.exports.fetchAllSeeds = fetchAllSeeds;
 module.exports.getFrequentlyChangedSites = getFrequentlyChangedSites;
-module.exports.shouldBeCrawled = shouldBeCrawled;
+module.exports.getAlreadyCrawled = getAlreadyCrawled;

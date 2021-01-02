@@ -65,12 +65,15 @@ async function runFullCrawlingProcess() {
     for (const seed of seeds) {
       let robots = await siteMapUtils.getRobots(seed.page);
       let siteMapUrl = await siteMapUtils.getSiteMapUrl(robots);
+      console.log(siteMapUrl)
       let siteMap = await siteMapUtils.getSiteMapXml(siteMapUrl);
+      // console.log('sitemap : ' + siteMap)
       if (!siteMap.urlset.url.some(loc => loc === seed.page)){
         siteMap.urlset.url.unshift({loc: seed.page})
         console.log(`page that was missing from sitemap: ${seed.page}`)
       }
-      // console.log(siteMap.urlset.url[0])
+      const alreadyCrawled = await dataUtils.getAlreadyCrawled(seed.page)
+      //console.log(alreadyCrawled.length)
       let pagesCrawled = 0;
       let index = 0;
       while (
@@ -88,9 +91,7 @@ async function runFullCrawlingProcess() {
           index++;
           continue;
         }
-        let shouldBeCrawled = await dataUtils.shouldBeCrawled(
-          siteMap.urlset.url[index].loc
-        );
+        let shouldBeCrawled = !alreadyCrawled.some(item => item.loc === siteMap.urlset.url[index].loc)
         if (shouldBeCrawled) {
           let title = await crawlingUtils.getPageTitle(
             siteMap.urlset.url[index].loc
@@ -128,6 +129,7 @@ async function runFullCrawlingProcess() {
         index++;
         if (sitesToInsert.length === CRAWLER_CONSTANTS.MASS_INSERT_RECORDS_SIZE){
           console.log('BATCH: ' + sitesToInsert.length)
+          // console.log('BATCH: ' + JSON.stringify(sitesToInsert))
           await Site.insertMany(sitesToInsert)
           sitesToInsert.length = 0
         }
@@ -135,6 +137,7 @@ async function runFullCrawlingProcess() {
       }
     }
     console.log('REMAINING: ' + sitesToInsert.length)
+    // console.log('REMAINING: ' + JSON.stringify(sitesToInsert))
     if (sitesToInsert.length) await Site.insertMany(sitesToInsert)
   } catch (err) {
     console.log(err);
