@@ -20,7 +20,7 @@ async function getSiteMapUrl(robots){
   let robotsLines = robots.match(/[^\r\n]+/g)
   robotsLines.forEach(element => {
     //if the line represents a sitemap
-    if(element.includes('Sitemap:')){
+    if(element.includes('Sitemap:') || element.includes('SITEMAP:')){
       sitemaps.push(element.split(' ')[1])
     }
   });
@@ -35,6 +35,7 @@ async function getSiteMapUrl(robots){
   for (const sm of sitemaps){
     if (sm.endsWith('.xml')) return sm
   }
+  return sitemaps[0]
 }
 
 async function getSiteMapXml(url){
@@ -48,7 +49,9 @@ async function getSiteMapXml(url){
       //check if it is sitemap index
       console.log('VALIDATED XML')
       if(jsonObj.sitemapindex){
-        return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
+        console.log('SITEMAP INDEX:' + JSON.stringify(jsonObj.sitemapindex))
+        if(Array.isArray(jsonObj.sitemapindex)) return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
+        return getSiteMapXml(jsonObj.sitemapindex.sitemap.loc)
       }
       //if it is not
       //console.log(JSON.stringify(jsonObj.urlset.url[0]['news:news']['news:publication_date']))
