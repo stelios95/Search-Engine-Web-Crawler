@@ -27,7 +27,8 @@ async function crawlWithCheerio(pageJsonInfo, method, pageTitle) {
 }
 
 async function crawlWithPuppeteer(pageJsonInfo, method, pageTitle) {
-  (async () => {
+  let site = undefined
+  await (async () => {
     //console.log('puppeteer')
     try {
       const browser = await puppeteer.launch({
@@ -42,13 +43,12 @@ async function crawlWithPuppeteer(pageJsonInfo, method, pageTitle) {
       });
       await page.close();
       await browser.close();
-      if (body) {
-        return getSiteDocument(body, pageJsonInfo, title, method);
-      } else return null
+      if (body)  site = getSiteDocument(body, pageJsonInfo, title, method);
     } catch (err) {
       console.log(err);
     }
   })();
+  return site
 }
 
 function getSiteDocument(content, pageJson, title, method) {
@@ -82,8 +82,9 @@ async function getPageTitle(url) {
     if (pageContent.status !== 200) pageContent = "";
     if (pageContent) {
       const $ = cheerio.load(pageContent.data);
-      title = $("title").text().split(' - ')[0];
-      title = title.split(' | ')[0]
+      title = $('head > title').text()
+      // .split(' - ')[0];
+      // title = title.split(' | ')[0]
     }
   } catch (err) {
     console.log(err.message);

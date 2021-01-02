@@ -66,7 +66,10 @@ async function runFullCrawlingProcess() {
       let robots = await siteMapUtils.getRobots(seed.page);
       let siteMapUrl = await siteMapUtils.getSiteMapUrl(robots);
       let siteMap = await siteMapUtils.getSiteMapXml(siteMapUrl);
-      siteMap.urlset.url.unshift({loc: seed.page})
+      if (!siteMap.urlset.url.some(loc => loc === seed.page)){
+        siteMap.urlset.url.unshift({loc: seed.page})
+        console.log(`page that was missing from sitemap: ${seed.page}`)
+      }
       // console.log(siteMap.urlset.url[0])
       let pagesCrawled = 0;
       let index = 0;
@@ -107,8 +110,10 @@ async function runFullCrawlingProcess() {
               seed.method,
               title
             );
-            if (crawledPage) sitesToInsert.push(crawledPage)
-            console.log(crawledPage.title)
+            if (crawledPage) {
+              sitesToInsert.push(crawledPage)
+              console.log(crawledPage.title)
+            }
           } else {
             const crawledPage = await crawlingUtils.crawlWithCheerio(
               siteMap.urlset.url[index],
