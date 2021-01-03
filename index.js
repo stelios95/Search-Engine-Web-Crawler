@@ -46,12 +46,10 @@ function refreshContent() {
   crawlingProcesses.refreshDatabaseContent();
 }
 
-
-// fullCrawl SHOULD NOT BE COMMENTED!!!!!!
 fullCrawl();
 
 // ONLY FOR TEST!!
-refreshContent()
+//refreshContent()
 
 const jobs = {};
 //================ FULL CRAWL ================================
