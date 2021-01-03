@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const dataUtils = require("./utils/dataFetchUtils");
 const siteMapUtils = require("./utils/siteMapUtils");
 const crawlingUtils = require("./utils/crawlingMethodsUtils");
@@ -7,6 +8,21 @@ const puppeteer = require("puppeteer");
 const textProcessUtils = require("./utils/textProcessUtils");
 const CRAWLER_CONSTANTS = require("./crawlerConstants")
 const Site = require("./pageSchema");
+const {
+  parentPort, workerData
+} = require('worker_threads');
+
+async function connectToMongo(workerData){
+  try {
+    await mongoose
+    .connect(CRAWLER_CONSTANTS.DATABASE_STRING, { useNewUrlParser: true })
+    // console.log(`Thread ${workerData.thread} connected!`);
+    runFullCrawlingProcess(workerData.data, workerData.thread)
+  } catch (error) {
+    console.log("ERROR: " + error);
+  }
+}
+connectToMongo(workerData)
 
 async function refreshDatabaseContent() {
   try {
@@ -16,7 +32,7 @@ async function refreshDatabaseContent() {
     console.log(sitesToRefresh.length)
     for (const site of sitesToRefresh) {
       console.log(site.loc);
-      if (site.method) { // why anonymous fucntion ?
+      if (site.method) { 
         console.log("puppeteer");
         const browser = await puppeteer.launch({
           headless: true,
@@ -76,23 +92,21 @@ async function massUpdate(scannedSites){
     console.log(`REFRESH PROCESS COMPLETED AT ${new Date()} `)
 }
 
-async function runFullCrawlingProcess() {
-  const titleLimit = 150;
+async function runFullCrawlingProcess(seeds, thread) {
   try {
-    let seeds = await dataUtils.fetchAllSeeds();
     const sitesToInsert = []
     for (const seed of seeds) {
       let robots = await siteMapUtils.getRobots(seed.page);
+      //console.log(robots)
       let siteMapUrl = await siteMapUtils.getSiteMapUrl(robots);
-      console.log(siteMapUrl)
+      //console.log(siteMapUrl)
       let siteMap = await siteMapUtils.getSiteMapXml(siteMapUrl);
-      // console.log('sitemap : ' + siteMap)
+      //console.log('sitemap : ' + siteMap)
       if (!siteMap.urlset.url.some(loc => loc === seed.page)){
         siteMap.urlset.url.unshift({loc: seed.page})
-        console.log(`page that was missing from sitemap: ${seed.page}`)
+        //console.log(`page that was missing from sitemap: ${seed.page}`)
       }
       const alreadyCrawled = await dataUtils.getAlreadyCrawled(seed.page)
-      //console.log(alreadyCrawled.length)
       let pagesCrawled = 0;
       let index = 0;
       while (
@@ -105,7 +119,7 @@ async function runFullCrawlingProcess() {
             siteMap.urlset.url[index]["news:news"]["news:title"]
           ) ||
             siteMap.urlset.url[index]["news:news"]["news:title"].length >
-              titleLimit)
+              CRAWLER_CONSTANTS.TITLE_LIMIT)
         ) {
           index++;
           continue;
@@ -115,11 +129,11 @@ async function runFullCrawlingProcess() {
           let title = await crawlingUtils.getPageTitle(
             siteMap.urlset.url[index].loc
           );
-          //console.log(title);
+          // console.log(title);
           if (
             !title ||
             !textProcessUtils.isAscii(title) ||
-            title.length > titleLimit
+            title.length > CRAWLER_CONSTANTS.TITLE_LIMIT
           ) {
             index++;
             continue;
@@ -132,7 +146,7 @@ async function runFullCrawlingProcess() {
             );
             if (crawledPage) {
               sitesToInsert.push(crawledPage)
-              console.log(crawledPage.title)
+              console.log(crawledPage.title + ` == ${thread}`)
             }
           } else {
             const crawledPage = await crawlingUtils.crawlWithCheerio(
@@ -141,13 +155,13 @@ async function runFullCrawlingProcess() {
               title
             );
             if (crawledPage) sitesToInsert.push(crawledPage)
-            console.log(crawledPage.title)
+            console.log(crawledPage.title + ` == ${thread}`)
           }
           pagesCrawled++;
         }
         index++;
         if (sitesToInsert.length === CRAWLER_CONSTANTS.MASS_INSERT_RECORDS_SIZE){
-          console.log('BATCH: ' + sitesToInsert.length)
+          console.log(`BATCH FROM THREAD ${thread} :${sitesToInsert.length}`)
           // console.log('BATCH: ' + JSON.stringify(sitesToInsert))
           await Site.insertMany(sitesToInsert)
           sitesToInsert.length = 0
@@ -155,13 +169,13 @@ async function runFullCrawlingProcess() {
           
       }
     }
-    console.log('REMAINING: ' + sitesToInsert.length)
+    console.log(`REMAINING FROM THREAD ${workerData.thread} :${sitesToInsert.length}`)
     // console.log('REMAINING: ' + JSON.stringify(sitesToInsert))
     if (sitesToInsert.length) await Site.insertMany(sitesToInsert)
   } catch (err) {
     console.log(err);
   } finally {
-    console.log(`FULL CRAWLING PROCESS COMPLETED AT ${new Date()} `);
+    console.log(`CRAWLING PROCESS FROM THREAD ${workerData.thread} COMPLETED AT ${new Date()} `);
   }
 }
 

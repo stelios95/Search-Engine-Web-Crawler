@@ -5,7 +5,7 @@ const he = require('he')
 async function getRobots(url){
   //make request to get the robots.txt
   try {
-    console.log(url + '/robots.txt' )
+    //console.log(url + '/robots.txt' )
       const robotsResponse = await axios
         .get(url + '/robots.txt')
       return robotsResponse.data
@@ -47,9 +47,9 @@ async function getSiteMapXml(url){
     if(parser.validate(xml.data) === true) { 
       let jsonObj = parser.parse(xml.data);
       //check if it is sitemap index
-      console.log('VALIDATED XML')
+      //console.log('VALIDATED XML')
       if(jsonObj.sitemapindex){
-        console.log('SITEMAP INDEX:' + JSON.stringify(jsonObj.sitemapindex))
+        //console.log('SITEMAP INDEX:' + JSON.stringify(jsonObj.sitemapindex))
         if(Array.isArray(jsonObj.sitemapindex)) return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
         return getSiteMapXml(jsonObj.sitemapindex.sitemap.loc)
       }

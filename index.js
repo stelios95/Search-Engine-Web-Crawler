@@ -4,27 +4,31 @@ const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 4500;
 const cors = require("cors");
 const CronJob = require("cron").CronJob;
-const crawlingProcesses = require("./crawlingProcesses");
+//const crawlingProcesses = require("./crawlingProcesses");
+const dataUtils = require("./utils/dataFetchUtils");
+const Site = require("./pageSchema");
+const CRAWLER_CONSTANTS = require("./crawlerConstants")
+const { Worker } = require("worker_threads")
 const app = express();
 const apiRoute = require("./routes");
-const dbConnectionString =
-  "mongodb+srv://dbAdmin:yei6fahl@cluster0-xy1h1.mongodb.net/test?retryWrites=true&w=majority";
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use("/api", apiRoute);
 //connect to the page content db
-mongoose
-  .connect(dbConnectionString, { useNewUrlParser: true }) //REFACTOR TO EXECUTE FIRST FULL CRAWL ONCE CONNCECTED TO ATLAS
-  .then(() => {
-    //connected
+async function connectToMongo(){
+  try {
+    await mongoose
+    .connect(CRAWLER_CONSTANTS.DATABASE_STRING, { useNewUrlParser: true })
     console.log("Connected to Atlas DB for page contents!");
-  })
-  .catch((error) => {
-    //db connection error
+    fullCrawl();
+  } catch (error) {
     console.log("ERROR: " + error);
-  });
+  }
+}
+
+connectToMongo()
 
 //server listening
 app.listen(PORT, () => {
@@ -34,10 +38,27 @@ app.listen(PORT, () => {
 
 //full crawl should start immediately at start up
 
-function fullCrawl() {
-  let date = new Date();
-  console.log(`FULL CRAWL STARTED ON: ${date}`);
-  crawlingProcesses.runFullCrawlingProcess();
+async function fullCrawl() {
+  try {
+    let date = new Date();
+    console.log(`FULL CRAWL STARTED ON: ${date}`);
+    const seeds = await dataUtils.fetchAllSeeds();
+    const seedChunkSize = seeds.length / CRAWLER_CONSTANTS.NUMBER_OF_THREADS
+    let start = 0
+    let end = seedChunkSize
+    for (let i = 0; i < CRAWLER_CONSTANTS.NUMBER_OF_THREADS; i++){
+      const worker = new Worker('./crawlingProcesses.js', { workerData: {
+        data: seeds.slice(start, end),
+        thread: i + 1,
+        method: CRAWLER_CONSTANTS.FULL_SCAN
+      } });
+      start = end
+      end = end + seedChunkSize < seeds.length ? end + seedChunkSize : seeds.length
+    }
+  } catch (err) {
+    console.log(err)
+  }
+  
 }
 
 function refreshContent() {
@@ -46,7 +67,6 @@ function refreshContent() {
   crawlingProcesses.refreshDatabaseContent();
 }
 
-fullCrawl();
 
 // ONLY FOR TEST!!
 //refreshContent()
