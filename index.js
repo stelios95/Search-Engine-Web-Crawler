@@ -36,11 +36,22 @@ app.listen(PORT, () => {
 
 function fullCrawl() {
   let date = new Date();
-  console.log(`FULL CRAWL STARTED ON: ${date.getMinutes()}`);
+  console.log(`FULL CRAWL STARTED ON: ${date}`);
   crawlingProcesses.runFullCrawlingProcess();
 }
 
+function refreshContent() {
+  let date = new Date();
+  console.log(`FULL CRAWL STARTED ON: ${date}`);
+  crawlingProcesses.refreshDatabaseContent();
+}
+
+
+// fullCrawl SHOULD NOT BE COMMENTED!!!!!!
 fullCrawl();
+
+// ONLY FOR TEST!!
+refreshContent()
 
 const jobs = {};
 //================ FULL CRAWL ================================
@@ -58,9 +69,7 @@ jobs.fullCrawlJob = new CronJob(
 jobs.refreshJob = new CronJob(
   "0 0 */6 * * *",
   function () {
-    let date = new Date();
-    console.log(`REFRESH STARTED ON: ${date.getMinutes()}`);
-    crawlingProcesses.refreshDatabaseContent();
+    refreshContent()
   },
   null,
   true,

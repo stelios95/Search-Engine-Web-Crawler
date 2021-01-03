@@ -10,28 +10,30 @@ const Site = require("./pageSchema");
 
 async function refreshDatabaseContent() {
   try {
+    console.log(`REFRESH STARTED ON ${new Date}`)
     let sitesToRefresh = await dataUtils.getFrequentlyChangedSites();
+    const sitesRescanned = []
+    console.log(sitesToRefresh.length)
     for (const site of sitesToRefresh) {
-      console.log(site);
-      if (site.method) {
-        async () => {
-          console.log("puppeteer");
-          const browser = await puppeteer.launch({
-            headless: true,
-            args: ["--no-sandbox", "--disable-setuid-sandbox", "--lang=en-GB"],
-          });
-          const page = await browser.newPage();
-          await page.goto(site.loc, { waitUntil: "load", timeout: 0 });
-          const body = await page.evaluate(() => {
-            return document.querySelector("html").innerText;
-          });
-          await page.close();
-          await browser.close();
-          if (body) {
-            let processedContent = textProcessUtils.getProcessedContent(body);
-            site.content = processedContent;
-          }
-        };
+      console.log(site.loc);
+      if (site.method) { // why anonymous fucntion ?
+        console.log("puppeteer");
+        const browser = await puppeteer.launch({
+          headless: true,
+          args: ["--no-sandbox", "--disable-setuid-sandbox", "--lang=en-GB"],
+        });
+        const page = await browser.newPage();
+        await page.goto(site.loc, { waitUntil: "load", timeout: 0 });
+        const body = await page.evaluate(() => {
+          return document.querySelector("html").innerText;
+        });
+        await page.close();
+        await browser.close();
+        if (body) {
+          let processedContent = textProcessUtils.getProcessedContent(body);
+          site.content = processedContent;
+          sitesRescanned.push(site)
+        }
       } else {
         let pageContent = await axios
           .get(site.loc)
@@ -46,15 +48,32 @@ async function refreshDatabaseContent() {
         if (content) {
           let processedContent = textProcessUtils.getProcessedContent(content);
           site.content = processedContent;
+          sitesRescanned.push(site)
         }
       }
-      await site.save();
+      if (sitesRescanned.length === CRAWLER_CONSTANTS.MASS_INSERT_RECORDS_SIZE){
+        massUpdate(sitesRescanned)
+        sitesRescanned.length = 0
+      }
     }
+    massUpdate(sitesRescanned)
+    sitesRescanned.length = 0
   } catch (err) {
     console.log(err);
-  } finally {
-    console.log(`REFRESH PROCESS COMPLETED AT ${new Date()} `);
   }
+}
+
+async function massUpdate(scannedSites){
+  let sitesUpdate = scannedSites.map(site => ({
+    updateOne: {
+      filter: { _id: site._id },
+      update: { $set: site },
+    }
+  }));
+  await Site.collection.bulkWrite(sitesUpdate)
+  console.log('BATCH REFRESHED: ' + sitesUpdate.length)
+  if (sitesUpdate.length !== CRAWLER_CONSTANTS.MASS_INSERT_RECORDS_SIZE)
+    console.log(`REFRESH PROCESS COMPLETED AT ${new Date()} `)
 }
 
 async function runFullCrawlingProcess() {
