@@ -49,7 +49,7 @@ async function getSiteMapXml(url){
       //check if it is sitemap index
       //console.log('VALIDATED XML')
       if(jsonObj.sitemapindex){
-        console.log('SITEMAP INDEX:' + JSON.stringify(jsonObj.sitemapindex))
+        //console.log('SITEMAP INDEX:' + JSON.stringify(jsonObj.sitemapindex))
         //if(Array.isArray(jsonObj.sitemapindex)) return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
         return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
       }
