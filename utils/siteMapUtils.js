@@ -27,7 +27,7 @@ async function getSiteMapUrl(robots){
   //select the final sitemap
   //select the first sitemap that includes articles or news
   for(const sm of sitemaps){
-    if((sm.includes('article') || sm.includes('news') ) && sm.endsWith('.xml')){
+    if((sm.includes('article') || sm.includes('news') || sm.includes('uk') || sm.includes('us')) && sm.endsWith('.xml')){
       return sm
     }
   }
