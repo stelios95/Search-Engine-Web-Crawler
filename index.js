@@ -126,8 +126,8 @@ function changeCronInterval(job, newPeriod, task) {
       null,
       true
     );
-    job.start();
   } else {
+    
     job = new CronJob(
       "0 0 */" + newPeriod + " * * *",
       function () {
@@ -136,7 +136,6 @@ function changeCronInterval(job, newPeriod, task) {
       null,
       true
     );
-    job.start();
   }
 }
 
