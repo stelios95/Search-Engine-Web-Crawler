@@ -99,8 +99,7 @@ jobs.fullCrawlJob = new CronJob(
     fullCrawl();
   },
   null,
-  true,
-  "America/Los_Angeles"
+  true
 );
 
 //=============== REFRESH DATABASE ============================
@@ -110,8 +109,7 @@ jobs.refreshJob = new CronJob(
     refreshContent()
   },
   null,
-  true,
-  "America/Los_Angeles"
+  true
 );
 
 function changeCronInterval(job, newPeriod, task) {
@@ -123,26 +121,20 @@ function changeCronInterval(job, newPeriod, task) {
     job = new CronJob(
       "0 0 */" + newPeriod + " * * *",
       function () {
-        let date = new Date();
-        console.log(`FULL CRAWL STARTED ON: ${date.getMinutes()}`);
-        crawlingProcesses.runFullCrawlingProcess();
+        fullCrawl()
       },
       null,
-      true,
-      "America/Los_Angeles"
+      true
     );
     job.start();
   } else {
     job = new CronJob(
       "0 0 */" + newPeriod + " * * *",
       function () {
-        let date = new Date();
-        console.log(`REFRESH STARTED ON: ${date.getMinutes()}`);
-        crawlingProcesses.refreshDatabaseContent();
+        refreshContent()
       },
       null,
-      true,
-      "America/Los_Angeles"
+      true
     );
     job.start();
   }
