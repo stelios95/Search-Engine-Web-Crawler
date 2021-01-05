@@ -22,8 +22,8 @@ async function connectToMongo(){
     await mongoose
     .connect(CRAWLER_CONSTANTS.DATABASE_STRING, { useNewUrlParser: true })
     console.log("Connected to Atlas DB for page contents!");
-    // fullCrawl();
-    refreshContent()
+    fullCrawl();
+    //refreshContent()
   } catch (error) {
     console.log("ERROR: " + error);
   }
