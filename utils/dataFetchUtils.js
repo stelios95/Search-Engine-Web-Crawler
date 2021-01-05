@@ -30,7 +30,8 @@ async function getFrequentlyChangedSites() {
 }
 
 async function getAlreadyCrawled(url) {
-  return await Site.find({ loc: {$regex: ".*" + url + ".*"} });
+  const generalDomain = url.includes('www') ? url.split('www')[1] : url.split('//')[1]
+  return await Site.find({ loc: {$regex: ".*" + generalDomain + ".*"} });
 }
 
 module.exports.fetchAllSeeds = fetchAllSeeds;
