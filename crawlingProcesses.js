@@ -8,28 +8,30 @@ const puppeteer = require("puppeteer");
 const textProcessUtils = require("./utils/textProcessUtils");
 const CRAWLER_CONSTANTS = require("./crawlerConstants")
 const Site = require("./pageSchema");
-const {
-  parentPort, workerData
-} = require('worker_threads');
+const { workerData } = require('worker_threads');
+
+connectToMongo(workerData)
 
 async function connectToMongo(workerData){
   try {
     await mongoose
     .connect(CRAWLER_CONSTANTS.DATABASE_STRING, { useNewUrlParser: true })
-    // console.log(`Thread ${workerData.thread} connected!`);
-    runFullCrawlingProcess(workerData.data, workerData.thread)
+    if (workerData.method === CRAWLER_CONSTANTS.FULL_SCAN)
+      await runFullCrawlingProcess(workerData.data, workerData.thread)
+    else if (workerData.method === CRAWLER_CONSTANTS.REFRESH_DATABASE)  {
+      await refreshDatabaseContent(workerData.data, workerData.thread)
+    }
+    mongoose.connection.close()
   } catch (error) {
     console.log("ERROR: " + error);
   }
 }
-connectToMongo(workerData)
 
-async function refreshDatabaseContent() {
+async function refreshDatabaseContent(sitesToRefresh, thread) {
   try {
     console.log(`REFRESH STARTED ON ${new Date}`)
-    let sitesToRefresh = await dataUtils.getFrequentlyChangedSites();
     const sitesRescanned = []
-    console.log(sitesToRefresh.length)
+    //console.log(sitesToRefresh[0])
     for (const site of sitesToRefresh) {
       console.log(site.loc);
       if (site.method) { 
@@ -51,6 +53,7 @@ async function refreshDatabaseContent() {
           sitesRescanned.push(site)
         }
       } else {
+        //console.log('SITE: ' + JSON.stringify(site))
         let pageContent = await axios
           .get(site.loc)
           .catch((err) => console.log(err));
@@ -68,18 +71,18 @@ async function refreshDatabaseContent() {
         }
       }
       if (sitesRescanned.length === CRAWLER_CONSTANTS.MASS_INSERT_RECORDS_SIZE){
-        massUpdate(sitesRescanned)
+        await massUpdate(sitesRescanned, thread)
         sitesRescanned.length = 0
       }
     }
-    massUpdate(sitesRescanned)
+    await massUpdate(sitesRescanned, thread)
     sitesRescanned.length = 0
   } catch (err) {
     console.log(err);
   }
 }
 
-async function massUpdate(scannedSites){
+async function massUpdate(scannedSites, thread){
   let sitesUpdate = scannedSites.map(site => ({
     updateOne: {
       filter: { _id: site._id },
@@ -87,9 +90,9 @@ async function massUpdate(scannedSites){
     }
   }));
   await Site.collection.bulkWrite(sitesUpdate)
-  console.log('BATCH REFRESHED: ' + sitesUpdate.length)
+  console.log('BATCH REFRESHED FROM THREAD ' + thread + ': ' + sitesUpdate.length)
   if (sitesUpdate.length !== CRAWLER_CONSTANTS.MASS_INSERT_RECORDS_SIZE)
-    console.log(`REFRESH PROCESS COMPLETED AT ${new Date()} `)
+    console.log(`REFRESH PROCESS FROM THREAD ${thread} COMPLETED AT ${new Date()} and will now close`)
 }
 
 async function runFullCrawlingProcess(seeds, thread) {
@@ -175,7 +178,7 @@ async function runFullCrawlingProcess(seeds, thread) {
   } catch (err) {
     console.log(err);
   } finally {
-    console.log(`CRAWLING PROCESS FROM THREAD ${workerData.thread} COMPLETED AT ${new Date()} `);
+    console.log(`CRAWLING PROCESS FROM THREAD ${workerData.thread} COMPLETED AT ${new Date()} and now will be closed <3 `);
   }
 }
 

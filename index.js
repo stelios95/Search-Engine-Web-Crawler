@@ -23,6 +23,7 @@ async function connectToMongo(){
     .connect(CRAWLER_CONSTANTS.DATABASE_STRING, { useNewUrlParser: true })
     console.log("Connected to Atlas DB for page contents!");
     fullCrawl();
+    //refreshContent()
   } catch (error) {
     console.log("ERROR: " + error);
   }
@@ -61,10 +62,29 @@ async function fullCrawl() {
   
 }
 
-function refreshContent() {
-  let date = new Date();
-  console.log(`FULL CRAWL STARTED ON: ${date}`);
-  crawlingProcesses.refreshDatabaseContent();
+async function refreshContent() {
+  try {
+    const sitesToRefresh = await dataUtils.getFrequentlyChangedSites();
+    console.log(sitesToRefresh.length)
+    const sitesToRefreshChunkSize = Math.floor(sitesToRefresh.length / CRAWLER_CONSTANTS.NUMBER_OF_THREADS)
+    const remainder = sitesToRefresh.length % CRAWLER_CONSTANTS.NUMBER_OF_THREADS
+    let start = 0
+    let end = sitesToRefreshChunkSize
+    for (let i = 1; i <= CRAWLER_CONSTANTS.NUMBER_OF_THREADS; i++){
+      //console.log(`CHUNK: ${end}`)
+      console.log(`start : ${start}, end ${end}`)
+      const worker = new Worker('./crawlingProcesses.js', { workerData: {
+        data: sitesToRefresh.slice(start, end).map(site => JSON.parse(JSON.stringify(site))),
+        thread: i ,
+        method: CRAWLER_CONSTANTS.REFRESH_DATABASE
+      } });
+      start = end
+      end = end + sitesToRefreshChunkSize
+      if (i === CRAWLER_CONSTANTS.NUMBER_OF_THREADS - 1) end += remainder - 1
+    }
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 
