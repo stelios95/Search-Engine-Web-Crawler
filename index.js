@@ -94,7 +94,7 @@ async function refreshContent() {
 const jobs = {};
 //================ FULL CRAWL ================================
 jobs.fullCrawlJob = new CronJob(
-  "0 0 */12 * * *",
+  "0 0 */6 * * *",
   function () {
     fullCrawl();
   },
@@ -104,7 +104,7 @@ jobs.fullCrawlJob = new CronJob(
 
 //=============== REFRESH DATABASE ============================
 jobs.refreshJob = new CronJob(
-  "0 0 */6 * * *",
+  "0 0 2 * * *",
   function () {
     refreshContent()
   },
