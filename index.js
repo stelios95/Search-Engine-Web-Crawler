@@ -61,7 +61,6 @@ async function fullCrawl() {
         });
         worker.on('error', reject);
         worker.on('exit', (code) => {
-          if (code !== 0)
             reject(new Error(`Worker stopped with exit code ${code}`));
         });
       }).catch(err => console.log(err.message))
@@ -69,6 +68,7 @@ async function fullCrawl() {
       start = end
       end = end + seedChunkSize < seeds.length ? end + seedChunkSize : seeds.length
     }
+    seeds.length = 0
   } catch (err) {
     console.log(err)
   }
@@ -106,6 +106,7 @@ async function refreshContent() {
       end = end + sitesToRefreshChunkSize
       if (i === CRAWLER_CONSTANTS.NUMBER_OF_THREADS - 1) end += remainder - 1
     }
+    sitesToRefresh.length = 0
   } catch (err) {
     console.log(err)
   }
@@ -118,7 +119,7 @@ async function refreshContent() {
 const jobs = {};
 //================ FULL CRAWL ================================
 jobs.fullCrawlJob = new CronJob(
-  "0 0 */1 * * *",
+  "0 /10* * * * *",
   function () {
     fullCrawl();
   },
