@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+mongoose.set('useCreateIndex', true);
 const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 4500;
 const cors = require("cors");
@@ -20,7 +21,7 @@ app.use("/api", apiRoute);
 async function connectToMongo(){
   try {
     await mongoose
-    .connect(CRAWLER_CONSTANTS.DATABASE_STRING, { useNewUrlParser: true })
+    .connect(CRAWLER_CONSTANTS.DATABASE_STRING, {useNewUrlParser: true, useUnifiedTopology: true})
     console.log("Connected to Atlas DB for page contents!");
     fullCrawl();
     //refreshContent()
@@ -48,11 +49,23 @@ async function fullCrawl() {
     let start = 0
     let end = seedChunkSize
     for (let i = 0; i < CRAWLER_CONSTANTS.NUMBER_OF_THREADS; i++){
-      const worker = new Worker('./crawlingProcesses.js', { workerData: {
-        data: seeds.slice(start, end),
-        thread: i + 1,
-        method: CRAWLER_CONSTANTS.FULL_SCAN
-      } });
+      new Promise ((resolve, reject ) => {
+        const worker = new Worker('./crawlingProcesses.js', { workerData: {
+          data: seeds.slice(start, end),
+          thread: i + 1,
+          method: CRAWLER_CONSTANTS.FULL_SCAN
+        } });
+        worker.on('message', result => {
+          worker.terminate()
+			    resolve(result)
+        });
+        worker.on('error', reject);
+        worker.on('exit', (code) => {
+          if (code !== 0)
+            reject(new Error(`Worker stopped with exit code ${code}`));
+        });
+      }).catch(err => console.log(err.message))
+
       start = end
       end = end + seedChunkSize < seeds.length ? end + seedChunkSize : seeds.length
     }
@@ -73,11 +86,22 @@ async function refreshContent() {
     for (let i = 1; i <= CRAWLER_CONSTANTS.NUMBER_OF_THREADS; i++){
       //console.log(`CHUNK: ${end}`)
       console.log(`start : ${start}, end ${end}`)
-      const worker = new Worker('./crawlingProcesses.js', { workerData: {
-        data: sitesToRefresh.slice(start, end).map(site => JSON.parse(JSON.stringify(site))),
-        thread: i ,
-        method: CRAWLER_CONSTANTS.REFRESH_DATABASE
-      } });
+      new Promise ((resolve, reject ) => {
+        const worker = new Worker('./crawlingProcesses.js', { workerData: {
+          data: sitesToRefresh.slice(start, end).map(site => JSON.parse(JSON.stringify(site))),
+          thread: i ,
+          method: CRAWLER_CONSTANTS.REFRESH_DATABASE
+        } });
+        worker.on('message', result => {
+          worker.terminate()
+			    resolve(result)
+        });
+        worker.on('error', reject);
+        worker.on('exit', (code) => {
+          if (code !== 0)
+            reject(new Error(`Worker stopped with exit code ${code}`));
+        });
+      }).catch(err => console.log(err.message))
       start = end
       end = end + sitesToRefreshChunkSize
       if (i === CRAWLER_CONSTANTS.NUMBER_OF_THREADS - 1) end += remainder - 1
@@ -94,7 +118,7 @@ async function refreshContent() {
 const jobs = {};
 //================ FULL CRAWL ================================
 jobs.fullCrawlJob = new CronJob(
-  "0 0 */6 * * *",
+  "0 0 */1 * * *",
   function () {
     fullCrawl();
   },

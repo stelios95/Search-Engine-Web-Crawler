@@ -7,7 +7,7 @@ async function getRobots(url){
   try {
     console.log(url + '/robots.txt' )
       const robotsResponse = await axios
-        .get(url + '/robots.txt')
+        .get(url + '/robots.txt', {maxRedirects: 15})
       return robotsResponse.data
     } catch (error) {
       console.error(error.message);
@@ -42,7 +42,7 @@ async function getSiteMapXml(url){
   let xml
   try {
     xml = await axios
-      .get(url)
+      .get(url, {maxRedirects: 100})
     // console.log(xml.data)
     if(parser.validate(xml.data) === true) { 
       let jsonObj = parser.parse(xml.data);
@@ -50,8 +50,8 @@ async function getSiteMapXml(url){
       //console.log('VALIDATED XML')
       if(jsonObj.sitemapindex){
         //console.log('SITEMAP INDEX:' + JSON.stringify(jsonObj.sitemapindex))
-        //if(Array.isArray(jsonObj.sitemapindex)) return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
-        return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
+        if(Array.isArray(jsonObj.sitemapindex.sitemap)) return getSiteMapXml(jsonObj.sitemapindex.sitemap[0].loc)
+        return getSiteMapXml(jsonObj.sitemapindex.sitemap.loc)
       }
       //if it is not
       //console.log(JSON.stringify(jsonObj.urlset.url[0]['news:news']['news:publication_date']))

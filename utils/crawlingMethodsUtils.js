@@ -8,7 +8,7 @@ async function crawlWithCheerio(pageJsonInfo, method, pageTitle) {
   //console.log('cheerio')
   try {
     let pageContent = await axios
-      .get(pageJsonInfo.loc)
+      .get(pageJsonInfo.loc, {maxRedirects: 15})
       .catch((err) => console.log(err));
     if (pageContent.status !== 200) pageContent = "";
     let content;
@@ -78,7 +78,7 @@ function getSiteDocument(content, pageJson, title, method) {
 async function getPageTitle(url) {
   let title = "";
   try {
-    let pageContent = await axios.get(url);
+    let pageContent = await axios.get(url, {maxRedirects: 15});
     if (pageContent.status !== 200) pageContent = "";
     if (pageContent) {
       const $ = cheerio.load(pageContent.data);

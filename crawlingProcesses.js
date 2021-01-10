@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+mongoose.set('useCreateIndex', true);
 const dataUtils = require("./utils/dataFetchUtils");
 const siteMapUtils = require("./utils/siteMapUtils");
 const crawlingUtils = require("./utils/crawlingMethodsUtils");
@@ -8,20 +9,21 @@ const puppeteer = require("puppeteer");
 const textProcessUtils = require("./utils/textProcessUtils");
 const CRAWLER_CONSTANTS = require("./crawlerConstants")
 const Site = require("./pageSchema");
-const { workerData } = require('worker_threads');
+const { workerData, parentPort } = require('worker_threads');
 
 connectToMongo(workerData)
 
 async function connectToMongo(workerData){
   try {
     await mongoose
-    .connect(CRAWLER_CONSTANTS.DATABASE_STRING, { useNewUrlParser: true })
+    .connect(CRAWLER_CONSTANTS.DATABASE_STRING, {useNewUrlParser: true, useUnifiedTopology: true})
     if (workerData.method === CRAWLER_CONSTANTS.FULL_SCAN)
       await runFullCrawlingProcess(workerData.data, workerData.thread)
     else if (workerData.method === CRAWLER_CONSTANTS.REFRESH_DATABASE)  {
       await refreshDatabaseContent(workerData.data, workerData.thread)
     }
     mongoose.connection.close()
+    parentPort.postMessage('END')
   } catch (error) {
     console.log("ERROR: " + error);
   }
@@ -55,7 +57,7 @@ async function refreshDatabaseContent(sitesToRefresh, thread) {
       } else {
         //console.log('SITE: ' + JSON.stringify(site))
         let pageContent = await axios
-          .get(site.loc)
+          .get(site.loc, {maxRedirects: 15})
           .catch((err) => console.log(err));
         if (pageContent.status === 403) continue;
         let content;
@@ -110,6 +112,8 @@ async function runFullCrawlingProcess(seeds, thread) {
         //console.log(`page that was missing from sitemap: ${seed.page}`)
       }
       const alreadyCrawled = await dataUtils.getAlreadyCrawled(seed.page)
+      console.log('SEED PASSED TO ALREADY CRAWLED: ' + seed.page)
+      console.log(`${seed.page} already crawled count: ${alreadyCrawled.length}`) 
       let pagesCrawled = 0;
       let index = 0;
       while (
@@ -158,7 +162,7 @@ async function runFullCrawlingProcess(seeds, thread) {
               title
             );
             if (crawledPage) sitesToInsert.push(crawledPage)
-            console.log(crawledPage.title + ` == ${thread}`)
+            //console.log(crawledPage.title + ` == ${thread}`)
           }
           pagesCrawled++;
         }

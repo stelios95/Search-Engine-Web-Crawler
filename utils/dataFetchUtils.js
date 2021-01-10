@@ -17,6 +17,7 @@ async function fetchAllSeeds() {
       headers: {
         Authorization: `Bearer ${loginResponse.data.token}`,
       },
+      maxRedirects: 15
     });
     return allSeedsResponse.data;
   } catch (error) {
