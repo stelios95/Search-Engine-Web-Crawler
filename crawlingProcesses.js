@@ -111,9 +111,9 @@ async function runFullCrawlingProcess(seeds, thread) {
         siteMap.urlset.url.unshift({loc: seed.page})
         //console.log(`page that was missing from sitemap: ${seed.page}`)
       }
-      const alreadyCrawled = await dataUtils.getAlreadyCrawled(seed.page)
+      // const alreadyCrawled = await dataUtils.getAlreadyCrawled(seed.page)
       console.log('SEED PASSED TO ALREADY CRAWLED: ' + seed.page)
-      console.log(`${seed.page} already crawled count: ${alreadyCrawled.length}`) 
+      //console.log(`${seed.page} already crawled count: ${alreadyCrawled.length}`) 
       let pagesCrawled = 0;
       let index = 0;
       while (
@@ -131,7 +131,7 @@ async function runFullCrawlingProcess(seeds, thread) {
           index++;
           continue;
         }
-        let shouldBeCrawled = !alreadyCrawled.some(item => item.loc === siteMap.urlset.url[index].loc)
+        let shouldBeCrawled = !await dataUtils.isAlreadyCrawled(siteMap.urlset.url[index].loc)
         if (shouldBeCrawled) {
           let title = await crawlingUtils.getPageTitle(
             siteMap.urlset.url[index].loc

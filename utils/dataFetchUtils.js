@@ -30,11 +30,11 @@ async function getFrequentlyChangedSites() {
   return await Site.find({ changefreq: { $nin: [null , "never"] } });
 }
 
-async function getAlreadyCrawled(url) {
-  const generalDomain = url.includes('www') ? url.split('www')[1] : url.split('//')[1]
-  return await Site.find({ loc: {$regex: ".*" + generalDomain + ".*"} });
+async function isAlreadyCrawled(url) {
+  let result = await Site.find({"loc": url})
+  return (result.length > 0) 
 }
 
 module.exports.fetchAllSeeds = fetchAllSeeds;
 module.exports.getFrequentlyChangedSites = getFrequentlyChangedSites;
-module.exports.getAlreadyCrawled = getAlreadyCrawled;
+module.exports.isAlreadyCrawled = isAlreadyCrawled;
