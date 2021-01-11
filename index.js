@@ -139,7 +139,7 @@ function changeCronInterval(job, newPeriod, task) {
   }
   if (task) {
     job = new CronJob(
-      "0 0 */" + newPeriod + " * * *",
+      "0 0 " + newPeriod + " * * *",
       function () {
         fullCrawl()
       },
