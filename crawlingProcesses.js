@@ -31,11 +31,10 @@ async function connectToMongo(workerData){
 
 async function refreshDatabaseContent(sitesToRefresh, thread) {
   try {
-    console.log(`REFRESH STARTED ON ${new Date}`)
     const sitesRescanned = []
     //console.log(sitesToRefresh[0])
     for (const site of sitesToRefresh) {
-      console.log(site.loc);
+      //console.log(site.loc);
       if (site.method) { 
         console.log("puppeteer");
         const browser = await puppeteer.launch({

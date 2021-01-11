@@ -75,15 +75,16 @@ async function fullCrawl() {
 
 async function refreshContent() {
   try {
+    console.log(`REFRESH STARTED ON ${new Date}`)
     const sitesToRefresh = await dataUtils.getFrequentlyChangedSites();
-    console.log(sitesToRefresh.length)
+    //console.log(sitesToRefresh.length)
     const sitesToRefreshChunkSize = Math.floor(sitesToRefresh.length / CRAWLER_CONSTANTS.NUMBER_OF_THREADS)
     const remainder = sitesToRefresh.length % CRAWLER_CONSTANTS.NUMBER_OF_THREADS
     let start = 0
     let end = sitesToRefreshChunkSize
     for (let i = 1; i <= CRAWLER_CONSTANTS.NUMBER_OF_THREADS; i++){
       //console.log(`CHUNK: ${end}`)
-      console.log(`start : ${start}, end ${end}`)
+      //console.log(`start : ${start}, end ${end}`)
       new Promise ((resolve, reject ) => {
         const worker = new Worker('./crawlingProcesses.js', { workerData: {
           data: sitesToRefresh.slice(start, end).map(site => JSON.parse(JSON.stringify(site))),
