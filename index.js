@@ -23,8 +23,8 @@ async function connectToMongo(){
     await mongoose
     .connect(CRAWLER_CONSTANTS.DATABASE_STRING, {useNewUrlParser: true, useUnifiedTopology: true})
     console.log("Connected to Atlas DB for page contents!");
-    //fullCrawl();
-    refreshContent()
+    fullCrawl();
+    //refreshContent()
   } catch (error) {
     console.log("ERROR: " + error);
   }
@@ -114,7 +114,7 @@ async function refreshContent() {
 const jobs = {};
 //================ FULL CRAWL ================================
 jobs.fullCrawlJob = new CronJob(
-  "0 */30 * * * *",
+  "0 0 */12 * * *",
   function () {
     fullCrawl();
   },
@@ -147,9 +147,8 @@ function changeCronInterval(job, newPeriod, task) {
       true
     );
   } else {
-    
     job = new CronJob(
-      "0 0 */" + newPeriod + " * * *",
+      "0 0 " + newPeriod + " * * *",
       function () {
         refreshContent()
       },
