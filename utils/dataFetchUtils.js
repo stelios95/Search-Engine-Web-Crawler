@@ -27,7 +27,7 @@ async function fetchAllSeeds() {
 
 //get only the sites that change frequently
 async function getFrequentlyChangedSites() {
-  return await Site.find({ changefreq: { $nin: [null , "never"] } });
+  return await Site.find({ changefreq: { $nin: [null , "never"] }, method: 0 }, {loc: 1});
 }
 
 async function isAlreadyCrawled(url) {

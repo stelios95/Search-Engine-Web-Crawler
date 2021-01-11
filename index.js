@@ -23,8 +23,8 @@ async function connectToMongo(){
     await mongoose
     .connect(CRAWLER_CONSTANTS.DATABASE_STRING, {useNewUrlParser: true, useUnifiedTopology: true})
     console.log("Connected to Atlas DB for page contents!");
-    fullCrawl();
-    //refreshContent()
+    //fullCrawl();
+    refreshContent()
   } catch (error) {
     console.log("ERROR: " + error);
   }
@@ -37,8 +37,6 @@ app.listen(PORT, () => {
   //listen for the queries of the client
   console.log("Server is up!");
 });
-
-//full crawl should start immediately at start up
 
 async function fullCrawl() {
   try {
@@ -111,10 +109,6 @@ async function refreshContent() {
     console.log(err)
   }
 }
-
-
-// ONLY FOR TEST!!
-//refreshContent()
 
 const jobs = {};
 //================ FULL CRAWL ================================
