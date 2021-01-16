@@ -10,7 +10,7 @@ configRoute.route('/changeInterval').post((req, res) => {
     crons.changeCronInterval(crons.jobs.fullCrawlJob, req.body.crawlFreq, 1)
     console.log(`New full scan frequency: Every ${req.body.crawlFreq} hours`)
     crons.changeCronInterval(crons.jobs.refreshJob, req.body.updateFreq, 0)
-    console.log(`New refresh frequency: At ${req.body.updateFreq} A.M.`)
+    console.log(`New refresh time: At ${req.body.updateFreq} A.M.`)
     res.status(200).send('OK')
   } catch(err){
     console.log('ERROR: '+ err)
