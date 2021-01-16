@@ -12,11 +12,58 @@ const CRAWLER_CONSTANTS = require("./crawlerConstants")
 const { Worker } = require("worker_threads")
 const app = express();
 const apiRoute = require("./routes");
+const axios = require("axios");
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use("/api", apiRoute);
+
+let fullCrawlInterval
+let updateTime
+const jobs = {};
+
+connectToMongo()
+getDefaultIntervals()
+
+async function getDefaultIntervals (){
+  try {
+    const result = await axios.get("https://crawler-admin-config-be.herokuapp.com/seeds/getDefaultIntervals")
+    fullCrawlInterval = result.data.updateContentTime;
+    updateTime = result.data.fullScanInterval;
+    console.log(fullCrawlInterval)
+    console.log(updateTime)
+    //================ FULL CRAWL ================================
+    jobs.fullCrawlJob = new CronJob(
+      "0 0 " + fullCrawlInterval + " * * *",
+      function () {
+        fullCrawl();
+      },
+      null,
+      true
+    );
+
+    //=============== REFRESH DATABASE ============================
+    jobs.refreshJob = new CronJob(
+      "0 0 " + updateTime + " * * *",
+      function () {
+        refreshContent()
+      },
+      null,
+      true
+    );
+  } catch (err){
+    console.log(err)
+  }
+}
+
+
+
+//server listening
+app.listen(PORT, () => {
+  console.log("Server is up!");
+});
+
 //connect to the page content db
 async function connectToMongo(){
   try {
@@ -27,13 +74,6 @@ async function connectToMongo(){
     console.log("ERROR: " + error);
   }
 }
-
-connectToMongo()
-
-//server listening
-app.listen(PORT, () => {
-  console.log("Server is up!");
-});
 
 async function fullCrawl() {
   try {
@@ -108,26 +148,6 @@ async function refreshContent() {
   }
 }
 
-const jobs = {};
-//================ FULL CRAWL ================================
-jobs.fullCrawlJob = new CronJob(
-  "0 0 */12 * * *",
-  function () {
-    fullCrawl();
-  },
-  null,
-  true
-);
-
-//=============== REFRESH DATABASE ============================
-jobs.refreshJob = new CronJob(
-  "0 0 2 * * *",
-  function () {
-    refreshContent()
-  },
-  null,
-  true
-);
 
 function changeCronInterval(job, newPeriod, task) {
   // task = 1 -> full crawl
