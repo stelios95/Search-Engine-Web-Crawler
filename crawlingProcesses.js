@@ -36,7 +36,7 @@ async function refreshDatabaseContent(sitesToRefresh, thread) {
     for (const site of sitesToRefresh) {
       //console.log(site.loc);
       if (site.method) { 
-        console.log("puppeteer");
+        // console.log("puppeteer");
         const browser = await puppeteer.launch({
           headless: true,
           args: ["--no-sandbox", "--disable-setuid-sandbox", "--lang=en-GB"],
@@ -101,49 +101,34 @@ async function runFullCrawlingProcess(seeds, thread) {
     const sitesToInsert = []
     for (const seed of seeds) {
       let robots = await siteMapUtils.getRobots(seed.page);
-      //console.log(robots)
       let siteMapUrl = await siteMapUtils.getSiteMapUrl(robots);
-      //console.log(siteMapUrl)
       let siteMap = await siteMapUtils.getSiteMapXml(siteMapUrl);
-      //console.log('sitemap : ' + siteMap)
       if (!siteMap.urlset.url.some(loc => loc === seed.page)){
         siteMap.urlset.url.unshift({loc: seed.page})
-        //console.log(`page that was missing from sitemap: ${seed.page}`)
       }
-      // const alreadyCrawled = await dataUtils.getAlreadyCrawled(seed.page)
-      console.log('SEED PASSED TO ALREADY CRAWLED: ' + seed.page)
-      //console.log(`${seed.page} already crawled count: ${alreadyCrawled.length}`) 
       let pagesCrawled = 0;
       let index = 0;
-      while (
-        pagesCrawled < seed.numberOfChildren &&
-        siteMap.urlset.url[index]
-      ) {
+      while ( pagesCrawled < seed.numberOfChildren && siteMap.urlset.url[index]) {
+        if ( siteMap.urlset.url[index]["news:news"] && 
+           (!textProcessUtils.isAscii(siteMap.urlset.url[index]["news:news"]["news:title"]) ||
+           siteMap.urlset.url[index]["news:news"]["news:title"].length > CRAWLER_CONSTANTS.TITLE_LIMIT)) {
+            index++;
+            continue;
+        }
+        let title = await crawlingUtils.getPageTitle(
+          siteMap.urlset.url[index].loc
+        );
+        // console.log(title);
         if (
-          siteMap.urlset.url[index]["news:news"] &&
-          (!textProcessUtils.isAscii(
-            siteMap.urlset.url[index]["news:news"]["news:title"]
-          ) ||
-            siteMap.urlset.url[index]["news:news"]["news:title"].length >
-              CRAWLER_CONSTANTS.TITLE_LIMIT)
+          !title ||
+          !textProcessUtils.isAscii(title) ||
+          title.length > CRAWLER_CONSTANTS.TITLE_LIMIT
         ) {
           index++;
           continue;
         }
-        let shouldBeCrawled = !await dataUtils.isAlreadyCrawled(siteMap.urlset.url[index].loc)
+        let shouldBeCrawled = !await dataUtils.isAlreadyCrawled(title)
         if (shouldBeCrawled) {
-          let title = await crawlingUtils.getPageTitle(
-            siteMap.urlset.url[index].loc
-          );
-          // console.log(title);
-          if (
-            !title ||
-            !textProcessUtils.isAscii(title) ||
-            title.length > CRAWLER_CONSTANTS.TITLE_LIMIT
-          ) {
-            index++;
-            continue;
-          }
           if (seed.method) {
             const crawledPage = await crawlingUtils.crawlWithPuppeteer(
               siteMap.urlset.url[index],

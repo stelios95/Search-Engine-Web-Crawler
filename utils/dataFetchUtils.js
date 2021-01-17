@@ -30,8 +30,8 @@ async function getFrequentlyChangedSites() {
   return await Site.find({ changefreq: { $nin: [null , "never"] }, method: 0 }, {loc: 1});
 }
 
-async function isAlreadyCrawled(url) {
-  let result = await Site.find({"loc": url})
+async function isAlreadyCrawled(title) {
+  let result = await Site.find({"title": title})
   return (result.length > 0) 
 }
 
