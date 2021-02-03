@@ -69,8 +69,8 @@ function getSiteDocument(content, pageJson, title, method) {
     content: finalStemmedContent,
     lastmod: lastModification,
     changefreq: pageJson.changefreq ? pageJson.changefreq : null,
-    priority: pageJson.priority ? pageJson.priority : null,
-    isNews: pageJson["news:news"] ? true : false,
+    //priority: pageJson.priority ? pageJson.priority : null,
+    //isNews: pageJson["news:news"] ? true : false,
     method: method,
   });
 }

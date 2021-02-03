@@ -30,12 +30,6 @@ const pageSchema = new Schema({
     },
     changefreq: {
         type: String
-    },
-    priority: {
-        type: String
-    },
-    isNews: {
-        type:Boolean
     }
 })
 
